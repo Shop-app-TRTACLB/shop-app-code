@@ -7,6 +7,3 @@ resource "random_id" "rg_suffix" {
   byte_length = 6
 }
 
-output "name" {
-  value = azurerm_resource_group.rg.name
-}
