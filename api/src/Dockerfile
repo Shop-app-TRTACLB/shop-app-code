@@ -27,11 +27,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Étape 5 : Copier le code source de l'application dans le conteneur
 COPY app /app/app
 COPY main.py /app/main.py
-COPY .env /app/.env
 
 # Étape 6 : Définir les variables d'environnement
 ENV FLASK_APP=main.py   
 ENV FLASK_ENV=development  
+ENV PRIVATE_ENDPOINT_IP=${PRIVATE_ENDPOINT_IP}
+ENV SQL_CONNECTION_STRING=${SQL_CONNECTION_STRING}
+ENV SECRET_KEY=${SECRET_KEY}
 
 # Étape 7 : Exposer le port utilisé par Flask (5000 par défaut)
 EXPOSE 5000
