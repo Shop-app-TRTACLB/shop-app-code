@@ -1,4 +1,4 @@
-from app.models.db import db  # Assurez-vous que db est importé
+from ..models.db import db  # Assurez-vous que db est importé
 
 # Modèle Item
 class Item(db.Model):

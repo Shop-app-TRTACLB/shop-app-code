@@ -1,6 +1,6 @@
-from app.routes.user_routes import user_bp
-from app.routes.item_routes import item_bp
-from app.routes.basket_routes import basket_bp
+from ..routes.user_routes import user_bp
+from ..routes.item_routes import item_bp
+from ..routes.basket_routes import basket_bp
 
 def init_routes(app):
     app.register_blueprint(user_bp, url_prefix='/users')

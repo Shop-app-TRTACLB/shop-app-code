@@ -1,4 +1,4 @@
-from app.models.db import db  # Importer l'instance de db
+from ..models.db import db  # Importer l'instance de db
 
 # Modèle User
 class User(db.Model):

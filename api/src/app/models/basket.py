@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from app.models.db import db
+from ..models.db import db
 
 # Modèle Basket
 class Basket(db.Model):
