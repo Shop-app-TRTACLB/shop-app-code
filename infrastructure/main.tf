@@ -11,11 +11,18 @@ provider "azurerm" {
   features {}
 }
 
+resource "random_id" "suffix" {
+  byte_length = 6
+}
+
+
 
 module "resource_group" {
   source = "./modules/ressource_group"
   resource_group_name = "Cloud-computing-project"
   location            = var.location
+  suffix             = random_id.suffix.hex
+
 }
   
 module "virtual_network" {
@@ -35,7 +42,8 @@ module "backend_app" {
   resource_group_name     = module.resource_group.name
   location                = var.location
   virtual_network_subnet_id = module.virtual_network.subnets[0]
-  database_private_ip = module.database.private_endpoint_ip  # Passer l'IP privée du module database
+  suffix             = random_id.suffix.hex
+  sql_connection_string   = module.database.sql_connection_string
 }
 
 module "database" {
@@ -46,5 +54,6 @@ module "database" {
   admin_user          = "adminuser"
   admin_password      = "P@ssword123"
   subnet_id           = module.virtual_network.subnets[1]  # ID du subnet 'database-subnet' 
+  suffix             = random_id.suffix.hex
 }
 

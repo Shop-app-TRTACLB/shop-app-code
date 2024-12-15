@@ -1,9 +1,6 @@
 resource "azurerm_resource_group" "rg" {
-  name     = "${var.resource_group_name}-${random_id.rg_suffix.hex}"
+  name     = "${var.resource_group_name}-${var.suffix}"  # Utilisation du suffixe aléatoire
   location = var.location
 }
 
-resource "random_id" "rg_suffix" {
-  byte_length = 6
-}
 
