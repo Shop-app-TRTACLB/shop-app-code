@@ -1,5 +1,5 @@
 resource "azurerm_service_plan" "example" {
-  name                = var.app_service_plan_name
+  name                = "${var.app_service_plan_name}-${var.suffix}"
   resource_group_name = var.resource_group_name
   location            = var.location
   os_type             = "Linux"
@@ -7,7 +7,7 @@ resource "azurerm_service_plan" "example" {
 }
 
 resource "azurerm_linux_web_app" "app" {
-  name                = "${var.app_name}-${random_id.app_suffix.hex}"
+  name                = "${var.app_name}-${var.suffix}"
   resource_group_name = var.resource_group_name
   location            = var.location
   service_plan_id     = azurerm_service_plan.example.id
@@ -19,10 +19,7 @@ resource "azurerm_linux_web_app" "app" {
   virtual_network_subnet_id = var.virtual_network_subnet_id
 
   app_settings = {
-    "DATABASE_URL" = "sqlserver://${var.database_private_ip}:1433"  # Utilisation de la variable pour l'IP privée
+    "DATABASE_URL" = var.sql_connection_string
   }
 }
 
-resource "random_id" "app_suffix" {
-  byte_length = 6
-}

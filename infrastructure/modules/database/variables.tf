@@ -30,3 +30,7 @@ variable "subnet_id" {
   type        = string
 }
 
+variable "suffix" {
+  description = "Le suffixe aléatoire pour nommer la base de données"
+  type        = string
+}
