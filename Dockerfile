@@ -3,7 +3,7 @@ FROM python:3.10-slim
  
 # Mettre à jour pip
 RUN pip install --upgrade pip
- 
+  
 # Installer les dépendances système nécessaires (par exemple pour pyodbc)
 RUN apt-get update && apt-get install -y \
     unixodbc-dev gcc \
