@@ -12,7 +12,7 @@ jobs:
       app_name: ${{ steps.capture_outputs.outputs.app_name }}
       rg_name: ${{ steps.capture_outputs.outputs.rg_name }}
       sql_connection_string: ${{ steps.capture_outputs.outputs.sql_connection_string }}
-      sql_connection_string_without: ${{ steps.capture_outputs.outputs.sql_connection_string_without }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -47,7 +47,7 @@ jobs:
      
           echo "SQL Connection String: $(terraform output -raw sql_connection_string)"
           echo "App Name: $(terraform output -raw app_name)"
-          echo 'SQL Connection String Without: $(terraform output -raw sql_connection_string_without)'
+      
 
       - name: Capture Terraform Outputs
         id: capture_outputs
@@ -56,16 +56,16 @@ jobs:
        
           SQL_CONNECTION_STRING=$(terraform output -raw sql_connection_string 2>/dev/null)
           APP_NAME=$(terraform output -raw app_name 2>/dev/null)
-          SQL_CONNECTION_STRING_WITHOUT=$(terraform output -raw sql_connection_string_without 2>/dev/null)
+       
 
           echo "::set-output name=app_name::$(terraform output -raw app_name 2>/dev/null)"
           echo "::set-output name=rg_name::$(terraform output -raw rg_name 2>/dev/null)"
           echo "::set-output name=sql_connection_string::$(terraform output -raw sql_connection_string 2>/dev/null)"
-          echo "::set-output name=sql_connection_string_without::$(terraform output -raw sql_connection_string_without 2>/dev/null)"
+
 
           echo "SQL_CONNECTION_STRING=$SQL_CONNECTION_STRING" >> $GITHUB_ENV
           echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
-          echo "SQL_CONNECTION_STRING_WITHOUT=$SQL_CONNECTION_STRING_WITHOUT >> $GITHUB_ENV
+
       
       
       - name: Check GITHUB_ENV Contents Last Step
@@ -75,12 +75,12 @@ jobs:
         run: |
           echo "APP_NAME=${{ env.APP_NAME }}"
           echo "SQL_CONNECTION_STRING=${{ env.SQL_CONNECTION_STRING }}"
-          echo "SQL_CONNECTION_STRING_WITHOUT=${{ env.SQL_CONNECTION_STRING_WITHOUT }}"
+
         env:
       
           SQL_CONNECTION_STRING: ${{ env.SQL_CONNECTION_STRING }}
           APP_NAME: ${{ env.APP_NAME }}
-          SQL_CONNECTION_STRING_WITHOUT: ${{ env.SQL_CONNECTION_STRING_WITHOUT }}
+        
 
   test:
     needs: plan-and-apply-terraform
@@ -103,7 +103,7 @@ jobs:
         run: |
           echo "SQL_CONNECTION_STRING_TERRAFORM_OUTPUT =${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}"
           echo "APP_NAME_TERRAFORM_OUTPUT =${{ needs.plan-and-apply-terraform.outputs.app_name }}"
-          echo "SQL_CONNECTION_STRING_WITHOUT =${{ needs.plan-and-apply-terraform.outputs.sql_connection_string_without }}"
+ 
       - name: Run tests
         run: |
           pytest
