@@ -22,11 +22,12 @@ jobs:
         with:
           terraform_version: 1.5.0
           terraform_wrapper: false
-      
+
       - name: Azure Login
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Initialize Terraform
         run: |
           cd infrastructure
@@ -45,30 +46,20 @@ jobs:
       - name: Check Terraform Outputs (Debugging)
         run: |
           cd infrastructure
-     
           echo "SQL Connection String: $(terraform output -raw sql_connection_string)"
           echo "App Name: $(terraform output -raw app_name)"
-      
 
       - name: Capture Terraform Outputs
         id: capture_outputs
         run: |
           cd infrastructure
-       
-          
           SQL_CONNECTION_STRING=$(terraform output -raw sql_connection_string 2>/dev/null)
           APP_NAME=$(terraform output -raw app_name 2>/dev/null)
 
-          # Définir les outputs pour être utilisés dans d'autres jobs
-          echo "::set-output name=sql_connection_string::$SQL_CONNECTION_STRING"
-          echo "::set-output name=app_name::$APP_NAME"
+          # Définir les outputs avec le nouveau format
+          echo "sql_connection_string=$SQL_CONNECTION_STRING" >> $GITHUB_OUTPUT
+          echo "app_name=$APP_NAME" >> $GITHUB_OUTPUT
 
-
-          echo "SQL_CONNECTION_STRING=$SQL_CONNECTION_STRING" >> $GITHUB_ENV
-          echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
-
-      
-      
       - name: Check GITHUB_ENV Contents Last Step
         run: cat $GITHUB_ENV
 
@@ -76,12 +67,9 @@ jobs:
         run: |
           echo "APP_NAME=${{ env.APP_NAME }}"
           echo "SQL_CONNECTION_STRING=${{ env.SQL_CONNECTION_STRING }}"
-
         env:
-      
           SQL_CONNECTION_STRING: ${{ env.SQL_CONNECTION_STRING }}
           APP_NAME: ${{ env.APP_NAME }}
-        
 
   test:
     needs: plan-and-apply-terraform
@@ -102,16 +90,17 @@ jobs:
 
       - name: Debug terraform output
         run: |
-            echo "SQL_CONNECTION_STRING_TERRAFORM_OUTPUT=${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}"
-            echo "APP_NAME_TERRAFORM_OUTPUT=${{ needs.plan-and-apply-terraform.outputs.app_name }}"
-        
+          echo "SQL_CONNECTION_STRING=${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}"
+          echo "APP_NAME=${{ needs.plan-and-apply-terraform.outputs.app_name }}"
+
       - name: Run tests
         run: |
           pytest
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           SQL_CONNECTION_STRING: "${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}"
-        
+          APP_NAME: "${{ needs.plan-and-apply-terraform.outputs.app_name }}"
+
 
   build-and-deploy:
     needs: [plan-and-apply-terraform, test]
