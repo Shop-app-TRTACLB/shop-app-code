@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       app_name: ${{ steps.capture_outputs.outputs.app_name }}
-      publish_profile: ${{ steps.capture_outputs.outputs.publish_profile }}
+   
       rg_name: ${{ steps.capture_outputs.outputs.rg_name }}
       sql_connection_string: ${{ steps.capture_outputs.outputs.sql_connection_string }}
     steps:
@@ -44,20 +44,20 @@ jobs:
       - name: Check Terraform Outputs (Debugging)
         run: |
           cd infrastructure
-          echo "Private Endpoint IP: $(terraform output -raw private_endpoint_ip)"
+
           echo "SQL Connection String: $(terraform output -raw sql_connection_string)"
           echo "App Name: $(terraform output -raw app_name)"
-          echo "Publish Profile: $(terraform output -raw publish_profile)"
+
       - name: Capture Terraform Outputs
         id: capture_outputs
         run: |
           cd infrastructure
-          PRIVATE_ENDPOINT_IP=$(terraform output -raw private_endpoint_ip 2>/dev/null)
+
           SQL_CONNECTION_STRING=$(terraform output -raw sql_connection_string 2>/dev/null)
           APP_NAME=$(terraform output -raw app_name 2>/dev/null)
-          PUBLISH_PROFILE=$(terraform output -raw publish_profile 2>/dev/null)
+      
           echo "::set-output name=app_name::$(terraform output -raw app_name 2>/dev/null)"
-          echo "::set-output name=publish_profile::$(terraform output -raw publish_profile 2>/dev/null)"
+
           echo "::set-output name=rg_name::$(terraform output -raw rg_name 2>/dev/null)"
           echo "::set-output name=sql_connection_string::$(terraform output -raw sql_connection_string 2>/dev/null)"
  
@@ -83,7 +83,7 @@ jobs:
         run: |
           echo "SQL Connection String: ${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}"
           echo "App Name: ${{ needs.plan-and-apply-terraform.outputs.app_name }}"
-          echo "Publish Profile: ${{ needs.plan-and-apply-terraform.outputs.publish_profile }}"
+     
           echo "Resource Group Name: ${{ needs.plan-and-apply-terraform.outputs.rg_name }}"
  
       - name: Run tests
