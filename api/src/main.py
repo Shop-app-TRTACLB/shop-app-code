@@ -12,7 +12,7 @@ load_dotenv()
 app = Flask(__name__)
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_BACEUGEU_DB")  # Chargement depuis .env
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQL_CONNECTION_STRING")  # Chargement depuis .env
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 

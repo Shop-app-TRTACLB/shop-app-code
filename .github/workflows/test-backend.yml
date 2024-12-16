@@ -8,6 +8,11 @@ on:
 jobs:
   plan-and-apply-terraform:
     runs-on: ubuntu-latest
+    outputs:
+      app_name: ${{ steps.capture_outputs.outputs.app_name }}
+      publish_profile: ${{ steps.capture_outputs.outputs.publish_profile }}
+      rg_name: ${{ steps.capture_outputs.outputs.rg_name }}
+      sql_connection_string: ${{ steps.capture_outputs.outputs.sql_connection_string }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -16,28 +21,23 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.5.0
-
+          terraform_wrapper: false
+      
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Initialize Terraform
         run: |
           cd infrastructure
           terraform init
 
       - name: Terraform Plan
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         run: |
           cd infrastructure
           terraform plan
 
       - name: Terraform Apply
-        env:
-          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         run: |
           cd infrastructure
           terraform apply -auto-approve
@@ -47,18 +47,39 @@ jobs:
           echo "Private Endpoint IP: $(terraform output -raw private_endpoint_ip)"
           echo "SQL Connection String: $(terraform output -raw sql_connection_string)"
           echo "App Name: $(terraform output -raw app_name)"
+          echo "Publish Profile: $(terraform output -raw publish_profile)"
       - name: Capture Terraform Outputs
         id: capture_outputs
         run: |
           cd infrastructure
-          PRIVATE_ENDPOINT_IP=$(terraform output -raw private_endpoint_ip 2>/dev/null | grep -v "::debug::")
-          SQL_CONNECTION_STRING=$(terraform output -raw sql_connection_string 2>/dev/null | grep -v "::debug::")
-          APP_NAME=$(terraform output -raw app_name 2>/dev/null | grep -v "::debug::")
-          PUBLISH_PROFILE=$(terraform output -raw publish_profile 2>/dev/null | grep -v "::debug::")
+          PRIVATE_ENDPOINT_IP=$(terraform output -raw private_endpoint_ip 2>/dev/null)
+          SQL_CONNECTION_STRING=$(terraform output -raw sql_connection_string 2>/dev/null)
+          APP_NAME=$(terraform output -raw app_name 2>/dev/null)
+          PUBLISH_PROFILE=$(terraform output -raw publish_profile 2>/dev/null)
+          echo "::set-output name=app_name::$(terraform output -raw app_name 2>/dev/null)"
+          echo "::set-output name=publish_profile::$(terraform output -raw publish_profile 2>/dev/null)"
+          echo "::set-output name=rg_name::$(terraform output -raw rg_name 2>/dev/null)"
+          echo "::set-output name=sql_connection_string::$(terraform output -raw sql_connection_string 2>/dev/null)"
           echo "PRIVATE_ENDPOINT_IP=$PRIVATE_ENDPOINT_IP" >> $GITHUB_ENV
           echo "SQL_CONNECTION_STRING=$SQL_CONNECTION_STRING" >> $GITHUB_ENV
           echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
           echo "PUBLISH_PROFILE=$PUBLISH_PROFILE" >> $GITHUB_ENV
+      
+      
+      - name: Check GITHUB_ENV Contents Last Step
+        run: cat $GITHUB_ENV
+
+      - name: Debugging - Show environment variables
+        run: |
+          echo "APP_NAME=${{ env.APP_NAME }}"
+          echo "PUBLISH_PROFILE=${{ env.PUBLISH_PROFILE }}"
+          echo "PRIVATE_ENDPOINT_IP=${{ env.PRIVATE_ENDPOINT_IP }}"
+          echo "SQL_CONNECTION_STRING=${{ env.SQL_CONNECTION_STRING }}"
+        env:
+          PRIVATE_ENDPOINT_IP: ${{ env.PRIVATE_ENDPOINT_IP }}
+          SQL_CONNECTION_STRING: ${{ env.SQL_CONNECTION_STRING }}
+          APP_NAME: ${{ env.APP_NAME }}
+          PUBLISH_PROFILE: ${{ env.PUBLISH_PROFILE }}
 
   test:
     needs: plan-and-apply-terraform
@@ -84,7 +105,7 @@ jobs:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
   build-and-deploy:
-    needs: test
+    needs: [plan-and-apply-terraform, test]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -99,6 +120,9 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Check GITHUB_ENV Contents Last Step
+        run: cat $GITHUB_ENV
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v2
@@ -107,27 +131,30 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ghcr.io/cloud-computing-project-trtaclb/my-flask-api:latest
+          build-args: |
+            SQL_CONNECTION_STRING=${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}
+            SECRET_KEY=${{ secrets.SECRET_KEY }}
       
-      - name: Azure login
-        uses: azure/login@v2
+      - name: Azure Login  
+        uses: azure/login@v1
         with:
-          auth-type: IDENTITY
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          enable-AzPSSession: true
-          environment: 'azurecloud'
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
         
-      - name: Azure Web App Deploy
-        env:
-          PRIVATE_ENDPOINT_IP: ${{env.PRIVATE_ENDPOINT_IP }}
-          SQL_CONNECTION_STRING: ${{env.SQL_CONNECTION_STRING }}
-          APP_NAME: ${{env.APP_NAME }}
-          PUBLISH_PROFILE: ${{env.PUBLISH_PROFILE }}
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: ${{ env.APP_NAME }}
-          slot-name: production
-          publish-profile: ${{ env.PUBLISH_PROFILE }}
-          images: "ghcr.io/cloud-computing-project-trtaclb/my-flask-api:latest"
-          
+      - name: Configure Web App for Docker Image
+        run: |
+          az webapp config container set \
+            --name "${{ needs.plan-and-apply-terraform.outputs.app_name }}" \
+            --resource-group "${{ needs.plan-and-apply-terraform.outputs.rg_name }}" \
+            --docker-custom-image-name "ghcr.io/cloud-computing-project-trtaclb/my-flask-api:latest" \
+            --docker-registry-server-url "https://ghcr.io" \
+            --docker-registry-server-user "${{ github.actor }}" \
+            --docker-registry-server-password "${{ secrets.GITHUB_TOKEN }}"
+      
+      - name: Restart Azure Web App
+        run: |
+          az webapp restart \
+            --name "${{ needs.plan-and-apply-terraform.outputs.app_name }}" \
+            --resource-group "${{ needs.plan-and-apply-terraform.outputs.rg_name }}"
+  
+
+        
