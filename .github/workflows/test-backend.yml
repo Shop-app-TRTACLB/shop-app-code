@@ -142,10 +142,12 @@ jobs:
           az webapp config container set \
             --name "${{ needs.plan-and-apply-terraform.outputs.app_name }}" \
             --resource-group "${{ needs.plan-and-apply-terraform.outputs.rg_name }}" \
-            --docker-custom-image-name "ghcr.io/shop-app-trtaclb/my-flask-api:latest" \
-            --docker-registry-server-url "https://ghcr.io" \
-            --docker-registry-server-user "${{ github.actor }}" \
-            --docker-registry-server-password "${{ secrets.GITHUB_TOKEN }}"
+            --container-image-name "ghcr.io/shop-app-trtaclb/my-flask-api:latest" \
+            --container-registry-url "https://ghcr.io" \
+            --container-registry-user "${{ github.actor }}" \
+            --container-registry-password "${{ secrets.GITHUB_TOKEN }}" \
+            --api-version 2024-03-01
+
      
       - name: Restart Azure Web App
         run: |
