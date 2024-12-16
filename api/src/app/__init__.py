@@ -17,7 +17,7 @@ def create_app(testing=False):
     if testing:
         app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///:memory:"
     else:
-        app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQLALCHEMY_BACEUGEU_DB")
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQL_CONNECTION_STRING")
 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "fallback_secret_key")
