@@ -1,6 +1,6 @@
 # Utiliser une image Python légère comme base
 FROM python:3.10-slim
-
+ 
 # Mettre à jour pip
 RUN pip install --upgrade pip
 
