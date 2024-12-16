@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 
 # Définir le répertoire de travail dans le conteneur
 WORKDIR /app
-
+ 
 # Copier les fichiers nécessaires dans le conteneur
 COPY requirements.txt /app/requirements.txt
 COPY api/src /app/src
