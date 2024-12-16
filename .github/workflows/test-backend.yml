@@ -1,107 +1,98 @@
 name: CI/CD Pipeline
-
+ 
 on:
   push:
     branches:
       - main
-
+ 
 jobs:
   plan-and-apply-terraform:
     runs-on: ubuntu-latest
     outputs:
       app_name: ${{ steps.capture_outputs.outputs.app_name }}
+      publish_profile: ${{ steps.capture_outputs.outputs.publish_profile }}
       rg_name: ${{ steps.capture_outputs.outputs.rg_name }}
       sql_connection_string: ${{ steps.capture_outputs.outputs.sql_connection_string }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
+ 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.5.0
           terraform_wrapper: false
-
+     
       - name: Azure Login
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
       - name: Initialize Terraform
         run: |
           cd infrastructure
           terraform init
-
+ 
       - name: Terraform Plan
         run: |
           cd infrastructure
           terraform plan
-
+ 
       - name: Terraform Apply
         run: |
           cd infrastructure
           terraform apply -auto-approve
-
       - name: Check Terraform Outputs (Debugging)
         run: |
           cd infrastructure
+          echo "Private Endpoint IP: $(terraform output -raw private_endpoint_ip)"
           echo "SQL Connection String: $(terraform output -raw sql_connection_string)"
           echo "App Name: $(terraform output -raw app_name)"
-
+          echo "Publish Profile: $(terraform output -raw publish_profile)"
       - name: Capture Terraform Outputs
         id: capture_outputs
         run: |
           cd infrastructure
+          PRIVATE_ENDPOINT_IP=$(terraform output -raw private_endpoint_ip 2>/dev/null)
           SQL_CONNECTION_STRING=$(terraform output -raw sql_connection_string 2>/dev/null)
           APP_NAME=$(terraform output -raw app_name 2>/dev/null)
-
-          # Définir les outputs avec le nouveau format
-          echo "sql_connection_string=$SQL_CONNECTION_STRING" >> $GITHUB_OUTPUT
-          echo "app_name=$APP_NAME" >> $GITHUB_OUTPUT
-
-      - name: Check GITHUB_ENV Contents Last Step
-        run: cat $GITHUB_ENV
-
-      - name: Debugging - Show environment variables
-        run: |
-          echo "APP_NAME=${{ env.APP_NAME }}"
-          echo "SQL_CONNECTION_STRING=${{ env.SQL_CONNECTION_STRING }}"
-        env:
-          SQL_CONNECTION_STRING: ${{ env.SQL_CONNECTION_STRING }}
-          APP_NAME: ${{ env.APP_NAME }}
-
+          PUBLISH_PROFILE=$(terraform output -raw publish_profile 2>/dev/null)
+          echo "::set-output name=app_name::$(terraform output -raw app_name 2>/dev/null)"
+          echo "::set-output name=publish_profile::$(terraform output -raw publish_profile 2>/dev/null)"
+          echo "::set-output name=rg_name::$(terraform output -raw rg_name 2>/dev/null)"
+          echo "::set-output name=sql_connection_string::$(terraform output -raw sql_connection_string 2>/dev/null)"
+ 
+ 
   test:
     needs: plan-and-apply-terraform
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
+ 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: 3.12
-
+ 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
-      - name: Debug terraform output
+ 
+      - name: Debogging Terraform Outputs
         run: |
-          echo "SQL_CONNECTION_STRING=${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}"
-          echo "APP_NAME=${{ needs.plan-and-apply-terraform.outputs.app_name }}"
-
+          echo "SQL Connection String: ${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}"
+          echo "App Name: ${{ needs.plan-and-apply-terraform.outputs.app_name }}"
+          echo "Publish Profile: ${{ needs.plan-and-apply-terraform.outputs.publish_profile }}"
+          echo "Resource Group Name: ${{ needs.plan-and-apply-terraform.outputs.rg_name }}"
+ 
       - name: Run tests
         run: |
           pytest
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
-          SQL_CONNECTION_STRING: "${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}"
-          APP_NAME: "${{ needs.plan-and-apply-terraform.outputs.app_name }}"
-
-
+          SQL_CONNECTION_STRING: ${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}
+ 
   build-and-deploy:
     needs: [plan-and-apply-terraform, test]
     runs-on: ubuntu-latest
@@ -111,17 +102,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
+ 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
+     
       - name: Check GITHUB_ENV Contents Last Step
         run: cat $GITHUB_ENV
-
+ 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v2
         with:
@@ -132,12 +123,12 @@ jobs:
           build-args: |
             SQL_CONNECTION_STRING=${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}
             SECRET_KEY=${{ secrets.SECRET_KEY }}
-      
+     
       - name: Azure Login  
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-        
+       
       - name: Configure Web App for Docker Image
         run: |
           az webapp config container set \
@@ -147,12 +138,11 @@ jobs:
             --docker-registry-server-url "https://ghcr.io" \
             --docker-registry-server-user "${{ github.actor }}" \
             --docker-registry-server-password "${{ secrets.GITHUB_TOKEN }}"
-      
+     
       - name: Restart Azure Web App
         run: |
           az webapp restart \
             --name "${{ needs.plan-and-apply-terraform.outputs.app_name }}" \
             --resource-group "${{ needs.plan-and-apply-terraform.outputs.rg_name }}"
-  
-
-        
+ 
+ 
