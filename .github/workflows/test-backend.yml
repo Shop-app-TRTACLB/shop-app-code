@@ -12,7 +12,7 @@ jobs:
       app_name: ${{ steps.capture_outputs.outputs.app_name }}
       publish_profile: ${{ steps.capture_outputs.outputs.publish_profile }}
       rg_name: ${{ steps.capture_outputs.outputs.rg_name }}
-      sql_connection_string: ${{ secrets.sql_connection_string }}
+      sql_connection_string: ${{ steps.capture_outputs.outputs.sql_connection_string }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -75,6 +75,7 @@ jobs:
           echo "PUBLISH_PROFILE=${{ env.PUBLISH_PROFILE }}"
         
           echo "SQL_CONNECTION_STRING=${{ env.SQL_CONNECTION_STRING }}"
+       
         env:
       
           SQL_CONNECTION_STRING: ${{ env.SQL_CONNECTION_STRING }}
@@ -98,12 +99,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      -name : Debug terraform output
+        run: |
+          echo "SQL_CONNECTION_STRING_TERRAFORM_OUTPUT =${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}"
+
       - name: Run tests
         run: |
           pytest
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
-          SQL_CONNECTION_STRING: ${{ secrets.sql_connection_string }}
+          SQL_CONNECTION_STRING: ${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}
 
   build-and-deploy:
     needs: [plan-and-apply-terraform, test]
@@ -133,7 +138,7 @@ jobs:
           push: true
           tags: ghcr.io/cloud-computing-project-trtaclb/my-flask-api:latest
           build-args: |
-            SQL_CONNECTION_STRING=${{ secrets.sql_connection_string }}
+            SQL_CONNECTION_STRING=${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}
             SECRET_KEY=${{ secrets.SECRET_KEY }}
       
       - name: Azure Login  
