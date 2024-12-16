@@ -58,9 +58,10 @@ jobs:
           APP_NAME=$(terraform output -raw app_name 2>/dev/null)
        
 
-          echo "::set-output name=app_name::$(terraform output -raw app_name 2>/dev/null)"
-          echo "::set-output name=rg_name::$(terraform output -raw rg_name 2>/dev/null)"
-          echo "::set-output name=sql_connection_string::$(terraform output -raw sql_connection_string 2>/dev/null)"
+          # Ajouter directement dans GITHUB_ENV
+          echo "SQL_CONNECTION_STRING=$SQL_CONNECTION_STRING" >> $GITHUB_ENV
+          echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
+          echo "rg_name=$(terraform output -raw rg_name 2>/dev/null)" >> $GITHUB_ENV
 
 
           echo "SQL_CONNECTION_STRING=$SQL_CONNECTION_STRING" >> $GITHUB_ENV
@@ -103,6 +104,8 @@ jobs:
         run: |
             echo "SQL_CONNECTION_STRING_TERRAFORM_OUTPUT=${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}"
             echo "APP_NAME_TERRAFORM_OUTPUT=${{ needs.plan-and-apply-terraform.outputs.app_name }}"
+            echo "SQl_CONNECTION_GIt_ENV=${{ env.SQL_CONNECTION_STRING }}"
+            echo "APP_NAME_GIt_ENV=${{ env.APP_NAME }}"
         
       - name: Run tests
         run: |
