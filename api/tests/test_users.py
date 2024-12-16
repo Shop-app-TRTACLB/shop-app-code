@@ -9,6 +9,10 @@ from src.app.models.db import db
 from src.app.models.users import User
 from src.app.models.items import Item
 from src.app.models.basket import Basket
+import os
+import load_dotenv
+
+load_dotenv.load_dotenv()
 
 @pytest.fixture
 def app():
@@ -18,7 +22,7 @@ def app():
     """
     # Ici, on indique testing=True -> la factory va utiliser "sqlite:///:memory:"
     app = create_app(testing=False)
-    
+    print('ICI REGARDER',os.getenv('SQL_CONNECTION_STRING'))
     with app.app_context(): # Contexte de l'application
         db.create_all()
 

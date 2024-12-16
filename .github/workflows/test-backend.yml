@@ -99,17 +99,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name : Debug terraform output
-        run: |
-          echo "SQL_CONNECTION_STRING_TERRAFORM_OUTPUT =${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}"
-          echo "APP_NAME_TERRAFORM_OUTPUT =${{ needs.plan-and-apply-terraform.outputs.app_name }}"
- 
+          - name: Debug terraform output
+          run: |
+            echo "SQL_CONNECTION_STRING_TERRAFORM_OUTPUT=${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}"
+            echo "APP_NAME_TERRAFORM_OUTPUT=${{ needs.plan-and-apply-terraform.outputs.app_name }}"
+        
       - name: Run tests
         run: |
           pytest
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           SQL_CONNECTION_STRING: "${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}"
+        
 
   build-and-deploy:
     needs: [plan-and-apply-terraform, test]
