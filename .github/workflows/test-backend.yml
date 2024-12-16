@@ -12,6 +12,7 @@ jobs:
       app_name: ${{ steps.capture_outputs.outputs.app_name }}
       rg_name: ${{ steps.capture_outputs.outputs.rg_name }}
       sql_connection_string: ${{ steps.capture_outputs.outputs.sql_connection_string }}
+      sql_connection_string_without: ${{ steps.capture_outputs.outputs.sql_connection_string_without }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -57,10 +58,10 @@ jobs:
           APP_NAME=$(terraform output -raw app_name 2>/dev/null)
           SQL_CONNECTION_STRING_WITHOUT=$(terraform output -raw sql_connection_string_without 2>/dev/null)
 
-          echo "::set-output name=app_name::$(terraform output -raw app_name 2>/dev/null)"
-          echo "::set-output name=rg_name::$(terraform output -raw rg_name 2>/dev/null)"
-          echo "::set-output name=sql_connection_string::$(terraform output -raw sql_connection_string 2>/dev/null)"
-          echo "::set-output name=sql_connection_string_without::$(terraform output -raw sql_connection_string_without 2>/dev/null)"
+          echo "APP_NAME=$(terraform output -raw app_name 2>/dev/null)" >> $GITHUB_ENV
+          echo "RG_NAME=$(terraform output -raw rg_name 2>/dev/null)" >> $GITHUB_ENV
+          echo "SQL_CONNECTION_STRING=$(terraform output -raw sql_connection_string 2>/dev/null)" >> $GITHUB_ENV
+          echo "SQL_CONNECTION_STRING_WITHOUT=$(terraform output -raw sql_connection_string_without 2>/dev/null)" >> $GITHUB_ENV
 
           echo "SQL_CONNECTION_STRING=$SQL_CONNECTION_STRING" >> $GITHUB_ENV
           echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
