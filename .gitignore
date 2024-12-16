@@ -1,1 +1,6 @@
-api/src
+# Ignorer tout le dossier logs
+logs/
+
+# Ignorer les fichiers compilés Python
+__pycache__/
+*.pyc

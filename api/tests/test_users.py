@@ -17,9 +17,9 @@ def app():
     et initialise la base de données *en mémoire* (SQLite).
     """
     # Ici, on indique testing=True -> la factory va utiliser "sqlite:///:memory:"
-    app = create_app(testing=True)
+    app = create_app(testing=False)
     
-    with app.app_context():
+    with app.app_context(): # Contexte de l'application
         db.create_all()
 
         # Insérer des items initiaux (20 items) si pas déjà présents
