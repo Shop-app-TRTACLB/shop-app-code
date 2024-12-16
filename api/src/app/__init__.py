@@ -17,7 +17,9 @@ def create_app(testing=False):
     if testing:
         app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///:memory:"
     else:
-        app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("SQL_CONNECTION_STRING")
+        sql_connection_string = os.getenv("SQL_CONNECTION_STRING")
+        app.config['SQLALCHEMY_DATABASE_URI'] = "mssql+pyodbc:///?odbc_connect=Driver={ODBC Driver 18 for SQL Server};Server=tcp:"+{sql_connection_string}+",1433;Database=userdb;Uid=adminuser;Pwd={P@ssword123};Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "fallback_secret_key")
