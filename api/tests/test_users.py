@@ -52,6 +52,7 @@ def app():
 @pytest.fixture
 def client(app):
     """Retourne un client de test Flask pour effectuer les requêtes HTTP."""
+    
     return app.test_client()
 
 
