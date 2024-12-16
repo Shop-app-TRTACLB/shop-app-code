@@ -101,7 +101,7 @@ jobs:
       - name : Debug terraform output
         run: |
           echo "SQL_CONNECTION_STRING_TERRAFORM_OUTPUT =${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}"
-
+          echo "APP_NAME_TERRAFORM_OUTPUT =${{ needs.plan-and-apply-terraform.outputs.app_name }}"
       - name: Run tests
         run: |
           pytest
