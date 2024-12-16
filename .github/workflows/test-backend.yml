@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       app_name: ${{ steps.capture_outputs.outputs.app_name }}
-      publish_profile: ${{ steps.capture_outputs.outputs.publish_profile }}
       rg_name: ${{ steps.capture_outputs.outputs.rg_name }}
       sql_connection_string: ${{ steps.capture_outputs.outputs.sql_connection_string }}
     steps:
@@ -47,7 +46,7 @@ jobs:
      
           echo "SQL Connection String: $(terraform output -raw sql_connection_string)"
           echo "App Name: $(terraform output -raw app_name)"
-          echo "Publish Profile: $(terraform output -raw publish_profile)"
+     
       - name: Capture Terraform Outputs
         id: capture_outputs
         run: |
@@ -55,15 +54,14 @@ jobs:
        
           SQL_CONNECTION_STRING=$(terraform output -raw sql_connection_string 2>/dev/null)
           APP_NAME=$(terraform output -raw app_name 2>/dev/null)
-          PUBLISH_PROFILE=$(terraform output -raw publish_profile 2>/dev/null)
+
           echo "::set-output name=app_name::$(terraform output -raw app_name 2>/dev/null)"
-          echo "::set-output name=publish_profile::$(terraform output -raw publish_profile 2>/dev/null)"
           echo "::set-output name=rg_name::$(terraform output -raw rg_name 2>/dev/null)"
           echo "::set-output name=sql_connection_string::$(terraform output -raw sql_connection_string 2>/dev/null)"
        
           echo "SQL_CONNECTION_STRING=$SQL_CONNECTION_STRING" >> $GITHUB_ENV
           echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
-          echo "PUBLISH_PROFILE=$PUBLISH_PROFILE" >> $GITHUB_ENV
+
       
       
       - name: Check GITHUB_ENV Contents Last Step
@@ -72,14 +70,13 @@ jobs:
       - name: Debugging - Show environment variables
         run: |
           echo "APP_NAME=${{ env.APP_NAME }}"
-          echo "PUBLISH_PROFILE=${{ env.PUBLISH_PROFILE }}"
           echo "SQL_CONNECTION_STRING=${{ env.SQL_CONNECTION_STRING }}"
        
         env:
       
           SQL_CONNECTION_STRING: ${{ env.SQL_CONNECTION_STRING }}
           APP_NAME: ${{ env.APP_NAME }}
-          PUBLISH_PROFILE: ${{ env.PUBLISH_PROFILE }}
+    
 
   test:
     needs: plan-and-apply-terraform
