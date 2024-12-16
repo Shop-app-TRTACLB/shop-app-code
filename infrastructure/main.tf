@@ -43,7 +43,6 @@ module "backend_app" {
   location                = var.location
   virtual_network_subnet_id = module.virtual_network.subnets[0]
   suffix             = random_id.suffix.hex
-  sql_connection_string   = module.database.sql_connection_string
 }
 
 module "database" {

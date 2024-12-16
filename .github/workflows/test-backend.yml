@@ -103,6 +103,7 @@ jobs:
           pytest
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          SQL_CONNECTION_STRING: ${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}
 
   build-and-deploy:
     needs: [plan-and-apply-terraform, test]

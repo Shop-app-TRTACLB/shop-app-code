@@ -9,7 +9,3 @@ variable "suffix" {
   type        = string
 }
 
-variable "sql_connection_string" {
-  description = "The SQL connection string provided by the root outputs."
-  type        = string
-}

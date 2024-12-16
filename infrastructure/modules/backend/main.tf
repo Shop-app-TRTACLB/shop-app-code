@@ -19,9 +19,6 @@ resource "azurerm_linux_web_app" "app" {
 
   virtual_network_subnet_id = var.virtual_network_subnet_id  # ID du sous-réseau du réseau virtuel
 
-  app_settings = {
-    "DATABASE_URL" = var.sql_connection_string  # Paramètre d'application pour la connexion à la base de données
-  }
 }
 
 
