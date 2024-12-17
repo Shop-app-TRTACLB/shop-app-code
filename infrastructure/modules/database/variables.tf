@@ -36,6 +36,6 @@ variable "suffix" {
 }
 
 variable "app_service_ips" {
-  description = "Les adresses IP des services App Service à autoriser"
+  description = "List of App Service outbound IP addresses to allow in the firewall"
   type        = list(string)
 }

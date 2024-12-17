@@ -77,7 +77,10 @@ jobs:
       - name: Terraform Apply (Database)
         run: |
           cd infrastructure
-          terraform apply -target=module.database -var "app_service_ips=${{ needs.plan-and-apply-terraform-initial.outputs.app_service_ips }}" -auto-approve
+          terraform apply \
+            -target=module.database \
+            -var "app_service_ips=${{ needs.plan-and-apply-terraform-initial.outputs.app_service_ips }}" \
+            -auto-approve
           
       - name: Capture Outputs (Initial)
         id: capture_outputs

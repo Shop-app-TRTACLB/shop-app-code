@@ -7,14 +7,15 @@
     administrator_login_password = var.admin_password                   # Mot de passe de l'administrateur pour se connecter au serveur SQL
   }
 
-  resource "azurerm_mssql_firewall_rule" "app_service_rule" {
-    count = length(var.app_service_ips)
-
-    name             = "allow-app-service-${count.index}"  # Nom unique basé sur l'index
-    server_id        = azurerm_mssql_server.server.id
-    start_ip_address = var.app_service_ips[count.index]
-    end_ip_address   = var.app_service_ips[count.index]
+  resource "azurerm_sql_firewall_rule" "allow_app_service_ips" {
+    for_each            = toset(var.app_service_ips)
+    name                = "Allow-AppService-IP-${each.value}"
+    resource_group_name = azurerm_sql_server.example.resource_group_name
+    server_name         = azurerm_sql_server.example.name
+    start_ip_address    = each.value
+    end_ip_address      = each.value
   }
+
 
 
 
