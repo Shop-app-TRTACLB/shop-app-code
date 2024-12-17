@@ -11,4 +11,6 @@ output "rg_name"{
     value = module.resource_group.name
 }
 
-
+output "server_name"{
+    value = module.database.server_name
+}
