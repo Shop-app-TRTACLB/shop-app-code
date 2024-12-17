@@ -48,7 +48,7 @@ jobs:
           echo "::set-output name=app_name::$(terraform output -raw app_name)"
           echo "::set-output name=rg_name::$(terraform output -raw rg_name)"
           echo "::set-output name=app_service_ips::$(terraform output -json app_service_ips)"
-
+          
   plan-and-apply-database:
     needs: plan-and-apply-terraform-initial
     runs-on: ubuntu-latest
