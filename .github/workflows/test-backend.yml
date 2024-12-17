@@ -165,5 +165,5 @@ jobs:
       - name: Fetch Azure Web App Logs
         run: |
           az webapp log tail \
-            --name "${{ env.app_name }}" \
-            --resource-group "${{ env.rg_name }}" --timeout 30
+            --name "${{ needs.plan-and-apply-terraform.outputs.app_name }}" \
+            --resource-group "${{ needs.plan-and-apply-terraform.outputs.rg_name }}" --timeout 30
