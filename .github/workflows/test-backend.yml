@@ -127,7 +127,7 @@ jobs:
         #     SQL_CONNECTION_STRING: ${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}
   
   build-and-deploy:
-    needs: [plan-and-apply-terraform-initial, plan-and-apply-database]
+    needs: [plan-and-apply-terraform-initial, plan-and-apply-database,test]
     runs-on: ubuntu-latest
     permissions:
       contents: read
