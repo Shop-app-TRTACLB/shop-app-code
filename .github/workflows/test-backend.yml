@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
- 
+  
 jobs:
   plan-and-apply-terraform:
     runs-on: ubuntu-latest
