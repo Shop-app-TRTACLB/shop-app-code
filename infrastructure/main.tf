@@ -54,6 +54,5 @@ module "database" {
   admin_password      = "P@ssword123"
   subnet_id           = module.virtual_network.subnets[1]  # ID du subnet 'database-subnet' 
   suffix             = random_id.suffix.hex
-  app_service_ips     = module.backend_app.app_service_outbound_ips  # Passer les IPs
 }
 

@@ -7,14 +7,6 @@
     administrator_login_password = var.admin_password                   # Mot de passe de l'administrateur pour se connecter au serveur SQL
   }
 
-  resource "azurerm_sql_firewall_rule" "allow_app_service_ips" {
-    for_each            = toset(var.app_service_ips)
-    name                = "Allow-AppService-IP-${each.value}"
-    resource_group_name = azurerm_sql_server.example.resource_group_name
-    server_name         = azurerm_sql_server.example.name
-    start_ip_address    = each.value
-    end_ip_address      = each.value
-  }
 
 
 

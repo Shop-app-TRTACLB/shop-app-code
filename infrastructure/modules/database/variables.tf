@@ -35,7 +35,3 @@ variable "suffix" {
   type        = string
 }
 
-variable "app_service_ips" {
-  description = "List of App Service outbound IP addresses to allow in the firewall"
-  type        = list(string)
-}

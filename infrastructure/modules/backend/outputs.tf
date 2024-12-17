@@ -23,7 +23,3 @@ output "app_service_plan_id" {
   value = azurerm_service_plan.example.id
 }
 
-output "app_service_ips" {
-  description = "The outbound IP addresses of the App Service"
-  value       = azurerm_linux_web_app.app.outbound_ip_addresses
-}
