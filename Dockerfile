@@ -28,7 +28,7 @@ COPY api/src /app/src
 # Installer les dépendances Python et nettoyer le cache de pip
 RUN pip install --no-cache-dir -r requirements.txt && \
     rm -rf /root/.cache
-
+ 
 # Passer les variables d'environnement
 ENV SQL_CONNECTION_STRING=${SQL_CONNECTION_STRING}
 ENV SECRET_KEY=${SECRET_KEY}
