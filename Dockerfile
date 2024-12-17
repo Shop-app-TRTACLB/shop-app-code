@@ -17,7 +17,7 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
 RUN apt-get update \
     && ACCEPT_EULA=Y apt-get install -y msodbcsql18 \
     && rm -rf /var/lib/apt/lists/*
-
+ 
 # Définir le répertoire de travail dans le conteneur
 WORKDIR /app
 
