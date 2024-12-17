@@ -10,7 +10,7 @@
  
 
   resource "azurerm_mssql_database" "db" {
-    name      = "${var.database_name}-${var.suffix}"  # Nom de la base de données, généré dynamiquement à partir des variables
+    name      = "${var.database_name}"  # Nom de la base de données, généré dynamiquement à partir des variables
     server_id = azurerm_mssql_server.server.id         # ID du serveur SQL sur lequel la base de données sera créée
   }
 
