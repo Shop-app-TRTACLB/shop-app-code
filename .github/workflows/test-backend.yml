@@ -150,8 +150,8 @@ jobs:
       - name: Enable Diagnostic Logs
         run: |
           az webapp log config \
-            --name "${{ env.app_name }}" \
-            --resource-group "${{ env.rg_name }}" \
+            --name "${{ needs.plan-and-apply-terraform.outputs.app_name }}" \
+            --resource-group "${{ needs.plan-and-apply-terraform.outputs.rg_name }}" \
             --docker-container-logging filesystem
       
 
