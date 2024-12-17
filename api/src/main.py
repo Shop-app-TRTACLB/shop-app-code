@@ -24,7 +24,7 @@ raw_connection_string = (
     f"TrustServerCertificate=no;"
     f"Connection Timeout=30;"
 )
-
+ 
 # Afficher la chaîne brute
 print("Raw Connection String:", raw_connection_string)
 
