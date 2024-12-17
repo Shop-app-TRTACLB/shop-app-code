@@ -6,64 +6,89 @@ on:
       - main
  
 jobs:
-  plan-and-apply-terraform:
+  plan-and-apply-terraform-initial:
     runs-on: ubuntu-latest
     outputs:
       app_name: ${{ steps.capture_outputs.outputs.app_name }}
-   
       rg_name: ${{ steps.capture_outputs.outputs.rg_name }}
-      sql_connection_string: ${{ steps.capture_outputs.outputs.sql_connection_string }}
+      app_service_ips: ${{ steps.capture_outputs.outputs.app_service_ips }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
- 
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.5.0
           terraform_wrapper: false
-     
+
       - name: Azure Login
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Initialize Terraform
         run: |
           cd infrastructure
           terraform init
- 
-      - name: Terraform Plan
-        run: |
-          cd infrastructure
-          terraform plan
- 
-      - name: Terraform Apply
-        run: |
-          cd infrastructure
-          terraform apply -auto-approve
-      - name: Check Terraform Outputs (Debugging)
-        run: |
-          cd infrastructure
 
-          echo "SQL Connection String: $(terraform output -raw sql_connection_string)"
-          echo "App Name: $(terraform output -raw app_name)"
+      - name: Terraform Apply (Initial Resources)
+        run: |
+          cd infrastructure
+          terraform apply -target=module.backend_app -target=module.virtual_network -target=module.resource_group -auto-approve
 
-      - name: Capture Terraform Outputs
+      - name: Capture Outputs (Initial)
         id: capture_outputs
         run: |
           cd infrastructure
+          echo "App Name: $(terraform output -raw app_name)"
+          echo "Resource Group Name: $(terraform output -raw rg_name)"
+          echo "App Service IPs: $(terraform output -json app_service_ips)"
 
-          SQL_CONNECTION_STRING=$(terraform output -raw sql_connection_string 2>/dev/null)
-          APP_NAME=$(terraform output -raw app_name 2>/dev/null)
-       
+          echo "::set-output name=app_name::$(terraform output -raw app_name)"
+          echo "::set-output name=rg_name::$(terraform output -raw rg_name)"
+          echo "::set-output name=app_service_ips::$(terraform output -json app_service_ips)"
 
-          echo "::set-output name=app_name::$(terraform output -raw app_name 2>/dev/null)"
-          echo "::set-output name=rg_name::$(terraform output -raw rg_name 2>/dev/null)"
-          echo "::set-output name=sql_connection_string::$(terraform output -raw sql_connection_string 2>/dev/null)"
+  plan-and-apply-database:
+    needs: plan-and-apply-terraform-initial
+    runs-on: ubuntu-latest
+    outputs:
+      sql_connection_string: ${{ steps.capture_outputs.outputs.sql_connection_string }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0
+          terraform_wrapper: false
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Initialize Terraform
+        run: |
+          cd infrastructure
+          terraform init
+
+      - name: Terraform Apply (Database)
+        run: |
+          cd infrastructure
+          terraform apply -target=module.database -var "app_service_ips=${{ needs.plan-and-apply-terraform-initial.outputs.app_service_ips }}" -auto-approve
+          
+      - name: Capture Outputs (Initial)
+        id: capture_outputs
+        run: |
+          cd infrastructure
+          echo "SQL_CONNECTION_STRING: $(terraform output -raw sql_connection_string)"
+          echo "::set-output name=sql_connection_string::$(terraform output -raw sql_connection_string)"
  
- 
+
   test:
-    needs: plan-and-apply-terraform
+    needs: [plan-and-apply-database,plan-and-apply-terraform-initial]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -81,10 +106,10 @@ jobs:
  
       - name: Debogging Terraform Outputs
         run: |
-          echo "SQL Connection String: ${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}"
-          echo "App Name: ${{ needs.plan-and-apply-terraform.outputs.app_name }}"
+          echo "SQL Connection String: ${{ needs.plan-and-apply-database.outputs.sql_connection_string }}"
+          echo "App Name: ${{ needs.plan-and-apply-terraform-initial.outputs.app_name }}"
           
-          echo "Resource Group Name: ${{ needs.plan-and-apply-terraform.outputs.rg_name }}"
+          echo "Resource Group Name: ${{ needs.plan-and-apply-terraform-initial.outputs.rg_name }}"
  
 
       - name: Install ODBC Driver for SQL Server
@@ -102,7 +127,7 @@ jobs:
         #     SQL_CONNECTION_STRING: ${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}
   
   build-and-deploy:
-    needs: [plan-and-apply-terraform, test]
+    needs: [plan-and-apply-terraform-initial, plan-and-apply-database]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -120,9 +145,9 @@ jobs:
      
       - name: Debug Outputs
         run: |
-            echo "SQL Connection String: ${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}"
-            echo "App Name: ${{ needs.plan-and-apply-terraform.outputs.app_name }}"
-            echo "Resource Group Name: ${{ needs.plan-and-apply-terraform.outputs.rg_name }}"
+            echo "SQL Connection String: ${{ needs.plan-and-apply-database.outputs.sql_connection_string }}"
+            echo "App Name: ${{ needs.plan-and-apply-terraform-initial.outputs.app_name }}"
+            echo "Resource Group Name: ${{ needs.plan-and-apply-terraform-initial.outputs.rg_name }}"
         
  
       - name: Build and Push Docker Image
@@ -133,7 +158,7 @@ jobs:
           push: true
           tags: ghcr.io/shop-app-trtaclb/my-flask-api:latest
           build-args: |
-            SQL_CONNECTION_STRING=${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}
+            SQL_CONNECTION_STRING=${{ needs.plan-and-apply-database.outputs.sql_connection_string }}
             SECRET_KEY=${{ secrets.SECRET_KEY }}
      
       - name: Azure Login  
@@ -144,8 +169,8 @@ jobs:
       - name: Configure Web App for Docker Image
         run: |
           az webapp config container set \
-            --name "${{ needs.plan-and-apply-terraform.outputs.app_name }}" \
-            --resource-group "${{ needs.plan-and-apply-terraform.outputs.rg_name }}" \
+            --name "${{ needs.plan-and-apply-terraform-initial.outputs.app_name }}" \
+            --resource-group "${{ needs.plan-and-apply-terraform-initial.outputs.rg_name }}" \
             --container-image-name "ghcr.io/shop-app-trtaclb/my-flask-api:latest" \
             --container-registry-url "https://ghcr.io" \
             --container-registry-user "${{ github.actor }}" \
@@ -156,17 +181,17 @@ jobs:
       - name: Configure Web App Environment Variables
         run: |
           az webapp config appsettings set \
-            --name "${{ needs.plan-and-apply-terraform.outputs.app_name }}" \
-            --resource-group "${{ needs.plan-and-apply-terraform.outputs.rg_name }}" \
-            --settings SQL_CONNECTION_STRING="${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}" \
+            --name "${{ needs.plan-and-apply-terraform-initial.outputs.app_name }}" \
+            --resource-group "${{ needs.plan-and-apply-terraform-initial.outputs.rg_name }}" \
+            --settings SQL_CONNECTION_STRING="${{ needs.plan-and-apply-database.outputs.sql_connection_string }}" \
                       SECRET_KEY="${{ secrets.SECRET_KEY }}"
 
 
       - name: Enable Diagnostic Logs
         run: |
           az webapp log config \
-            --name "${{ needs.plan-and-apply-terraform.outputs.app_name }}" \
-            --resource-group "${{ needs.plan-and-apply-terraform.outputs.rg_name }}" \
+            --name "${{ needs.plan-and-apply-terraform-initial.outputs.app_name }}" \
+            --resource-group "${{ needs.plan-and-apply-terraform-initial.outputs.rg_name }}" \
             --docker-container-logging filesystem
       
  
@@ -174,6 +199,6 @@ jobs:
       - name: Restart Azure Web App
         run: |
           az webapp restart \
-            --name "${{ needs.plan-and-apply-terraform.outputs.app_name }}" \
-            --resource-group "${{ needs.plan-and-apply-terraform.outputs.rg_name }}"
+            --name "${{ needs.plan-and-apply-terraform-initial.outputs.app_name }}" \
+            --resource-group "${{ needs.plan-and-apply-terraform-initial.outputs.rg_name }}"
  
