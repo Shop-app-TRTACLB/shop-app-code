@@ -11,9 +11,9 @@ load_dotenv()
 # Créer l'application Flask
 app = Flask(__name__)
 
+
 sql_connection_string = os.getenv("SQL_CONNECTION_STRING")
-sql_connection_string = os.getenv("SQL_CONNECTION_STRING")
-app.config['SQLALCHEMY_DATABASE_URI'] = (
+raw_connection_string = (
     f"mssql+pyodbc:///?odbc_connect="
     f"Driver={{ODBC Driver 18 for SQL Server}};"
     f"Server=tcp:{sql_connection_string},1433;"
@@ -25,6 +25,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
     f"Connection Timeout=30;"
 )
 
+# Afficher la chaîne brute
+print("Raw Connection String:", raw_connection_string)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = raw_connection_string
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
