@@ -128,7 +128,7 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ghcr.io/shop-app-trtaclb/my-flask-api:latest
-          build-args: |
+          env: |
             SQL_CONNECTION_STRING=${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}
             SECRET_KEY=${{ secrets.SECRET_KEY }}
      
