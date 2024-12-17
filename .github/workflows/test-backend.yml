@@ -151,6 +151,17 @@ jobs:
             --container-registry-user "${{ github.actor }}" \
             --container-registry-password "${{ secrets.GITHUB_TOKEN }}"
 
+
+        
+      - name: Configure Web App Environment Variables
+        run: |
+          az webapp config appsettings set \
+            --name "${{ needs.plan-and-apply-terraform.outputs.app_name }}" \
+            --resource-group "${{ needs.plan-and-apply-terraform.outputs.rg_name }}" \
+            --settings SQL_CONNECTION_STRING="${{ needs.plan-and-apply-terraform.outputs.sql_connection_string }}" \
+                      SECRET_KEY="${{ secrets.SECRET_KEY }}"
+
+
       - name: Enable Diagnostic Logs
         run: |
           az webapp log config \
