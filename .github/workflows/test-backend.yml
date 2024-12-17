@@ -154,7 +154,7 @@ jobs:
             --resource-group "${{ needs.plan-and-apply-terraform.outputs.rg_name }}" \
             --docker-container-logging filesystem
       
-
+ 
      
       - name: Restart Azure Web App
         run: |
