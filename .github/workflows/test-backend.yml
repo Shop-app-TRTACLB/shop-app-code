@@ -177,8 +177,3 @@ jobs:
             --name "${{ needs.plan-and-apply-terraform.outputs.app_name }}" \
             --resource-group "${{ needs.plan-and-apply-terraform.outputs.rg_name }}"
  
-      - name: Fetch Azure Web App Logs
-        run: |
-          az webapp log tail \
-            --name "${{ needs.plan-and-apply-terraform.outputs.app_name }}" \
-            --resource-group "${{ needs.plan-and-apply-terraform.outputs.rg_name }}"

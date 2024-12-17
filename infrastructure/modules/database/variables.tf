@@ -34,3 +34,8 @@ variable "suffix" {
   description = "Le suffixe aléatoire pour nommer la base de données"
   type        = string
 }
+
+variable "app_service_ips" {
+  description = "Les adresses IP des services App Service à autoriser"
+  type        = list(string)
+}

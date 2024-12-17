@@ -7,7 +7,15 @@
     administrator_login_password = var.admin_password                   # Mot de passe de l'administrateur pour se connecter au serveur SQL
   }
 
- 
+ resource "azurerm_mssql_firewall_rule" "app_service_rule" {
+  for_each = toset(var.app_service_ips)
+
+  name             = "allow-app-service-${each.key}"  # Nom unique pour chaque IP
+  server_id        = azurerm_mssql_server.server.id
+  start_ip_address = each.value
+  end_ip_address   = each.value
+}
+
 
   resource "azurerm_mssql_database" "db" {
     name      = "${var.database_name}"  # Nom de la base de données, généré dynamiquement à partir des variables
