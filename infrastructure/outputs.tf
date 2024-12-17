@@ -9,6 +9,3 @@ output "rg_name"{
 }
 
 
-output "app_service_ips" {
-  value = module.backend.app_service_ips
-}
