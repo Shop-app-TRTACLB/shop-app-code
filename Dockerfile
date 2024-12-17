@@ -34,7 +34,7 @@ ENV SQL_CONNECTION_STRING=${SQL_CONNECTION_STRING}
 ENV SECRET_KEY=${SECRET_KEY}
 
 # Exposer le port utilisé par Flask (exemple : 5000)
-EXPOSE 5000
+EXPOSE 80
 
 # Définir la commande pour démarrer l'application
 CMD ["python", "src/main.py"]

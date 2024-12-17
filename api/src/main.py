@@ -43,4 +43,5 @@ init_routes(app)
 
 if __name__ == "__main__":
     # app.run(debug=os.getenv("FLASK_DEBUG", False))
-    app.run(port=8080)  # Changez le port ici
+    app.run(host="0.0.0.0", port=80)  # Écoute sur toutes les interfaces, port 80
+

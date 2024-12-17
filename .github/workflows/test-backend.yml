@@ -140,13 +140,20 @@ jobs:
       - name: Configure Web App for Docker Image
         run: |
           az webapp config container set \
-          --name "${{ needs.plan-and-apply-terraform.outputs.app_name }}" \
-          --resource-group "${{ needs.plan-and-apply-terraform.outputs.rg_name }}" \
-          --docker-custom-image-name "ghcr.io/shop-app-trtaclb/my-flask-api:latest" \
-          --docker-registry-server-url "https://ghcr.io" \
-          --docker-registry-server-user "${{ github.actor }}" \
-          --docker-registry-server-password "${{ secrets.GITHUB_TOKEN }}"
+            --name "${{ needs.plan-and-apply-terraform.outputs.app_name }}" \
+            --resource-group "${{ needs.plan-and-apply-terraform.outputs.rg_name }}" \
+            --container-image-name "ghcr.io/shop-app-trtaclb/my-flask-api:latest" \
+            --container-registry-url "https://ghcr.io" \
+            --container-registry-user "${{ github.actor }}" \
+            --container-registry-password "${{ secrets.GITHUB_TOKEN }}"
 
+      - name: Enable Diagnostic Logs
+        run: |
+          az webapp log config \
+            --name "${{ env.app_name }}" \
+            --resource-group "${{ env.rg_name }}" \
+            --docker-container-logging filesystem
+      
 
      
       - name: Restart Azure Web App
@@ -155,4 +162,8 @@ jobs:
             --name "${{ needs.plan-and-apply-terraform.outputs.app_name }}" \
             --resource-group "${{ needs.plan-and-apply-terraform.outputs.rg_name }}"
  
- 
+      - name: Fetch Azure Web App Logs
+        run: |
+          az webapp log tail \
+            --name "${{ env.app_name }}" \
+            --resource-group "${{ env.rg_name }}" --timeout 30
