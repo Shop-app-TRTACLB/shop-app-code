@@ -13,11 +13,12 @@ app = Flask(__name__)
 
 
 sql_connection_string = os.getenv("SQL_CONNECTION_STRING")
+print("SQL Connection String:", sql_connection_string)
 raw_connection_string = (
     f"mssql+pyodbc:///?odbc_connect="
     f"Driver={{ODBC Driver 18 for SQL Server}};"
     f"Server=tcp:{sql_connection_string},1433;"
-    f"Database=userdb;"
+    f"Database=baceugeu-db;"
     f"Uid=adminuser;"
     f"Pwd={{P@ssword123}};"
     f"Encrypt=yes;"
