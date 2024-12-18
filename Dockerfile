@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
 # Ajouter la clé GPG et le dépôt Microsoft
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
     && curl https://packages.microsoft.com/config/ubuntu/22.04/prod.list > /etc/apt/sources.list.d/mssql-release.list
-
+ 
 # Installer le driver ODBC Microsoft
 RUN apt-get update \
     && ACCEPT_EULA=Y apt-get install -y msodbcsql18 \
