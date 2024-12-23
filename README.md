@@ -67,7 +67,7 @@ Ce projet propose une API sécurisée permettant de gérer des utilisateurs et d
 #### Endpoints
 
    #### **1. Utilisateurs (```/users```)**
-   ##### **GET /users/all**
+   ##### ```GET /users/all```
    Récupére la liste de tous les utilisateurs.
    
    **Réponse:**
