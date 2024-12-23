@@ -246,7 +246,8 @@ Ce projet propose une API sécurisée permettant de gérer des utilisateurs et d
 
 ### 🌐 **Infrastructure du projet**
 
-![diagram-export-23-12-2024-11_12_29](https://github.com/user-attachments/assets/3cd6aa23-b830-45a1-979c-a25d75a72a3f)
+![diagram-export-23-12-2024-11_15_00](https://github.com/user-attachments/assets/695fdb06-a990-4729-aea1-da2a30327cd2)
+
 
 
 
