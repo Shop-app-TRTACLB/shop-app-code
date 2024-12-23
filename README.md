@@ -44,7 +44,12 @@ Ce projet propose une API sécurisée permettant de gérer des utilisateurs et d
     }
    ```
 
-#### 4ème étape : Push and Deploy
+#### 4ème étape : Ajout de la clé secrète.
+   1. Générez une clé secrète pour signer les tokens en utilisant un générateur de token.
+   2. Ajoutez cette clé comme secret dans votre dépôt Github sous la clé ```SECRET_KEY```.
+
+      
+#### 5ème étape : Push and Deploy
   1. Poussez ce projet dans votre dépôt en suivant ces étapes:
    ```bash
     git remote remove origin
@@ -53,9 +58,6 @@ Ce projet propose une API sécurisée permettant de gérer des utilisateurs et d
    ```
   En poussant le projet sur votre branche main, la ci-cd de déploiement se lancera et votre projet sera prêt à être utilisé !
 
-#### 4ème étape : Ajout de la clé secrète.####
-   1. Générez une clé secrète pour signer les tokens en utilisant un générateur de token.
-   2. Ajoutez cette clé comme secret dans votre dépôt Github sous la clé ```SECRET_KEY```.
 
 
 ### 🔧 **Utilisation de l'API**
