@@ -82,7 +82,7 @@ Ce projet propose une API sécurisée permettant de gérer des utilisateurs et d
 
    ```
 
-   ##### **POST /users/signup**
+   ##### ```POST /users/signup```
    Inscription d'un nouvel utilisateur.
 
    *   **Body (JSON) :**
@@ -107,7 +107,7 @@ Ce projet propose une API sécurisée permettant de gérer des utilisateurs et d
 }
    ```
    
-   ##### **POST /users/login**
+   ##### ```POST /users/login```
    Authentification de l'utilisateur.
 
    *   **Body (JSON) :**
@@ -131,7 +131,7 @@ Ce projet propose une API sécurisée permettant de gérer des utilisateurs et d
 }
    ```
 
-   ##### **GET /users/basket**
+   ##### ```GET /users/basket**```
    Récupère le panier de l'utilisateur authentifié.
 
    *   **Headers :**
@@ -155,7 +155,7 @@ Ce projet propose une API sécurisée permettant de gérer des utilisateurs et d
   "error": "Token expired"
 }
    ```
-   ##### **POST /users/basket/add**
+   ##### ```POST /users/basket/add```
    Ajoute un article au panier de l'utilisateur authentifié.
 
    *   **Headers :**
@@ -181,7 +181,7 @@ Ce projet propose une API sécurisée permettant de gérer des utilisateurs et d
 }
    ```
 
-   ##### **POST /users/basket/remove**
+   ##### ```POST /users/basket/remove```
    Supprime un article du panier de l'utilisateur authentifié.
 
    *   **Headers :**
@@ -208,7 +208,7 @@ Ce projet propose une API sécurisée permettant de gérer des utilisateurs et d
 
 
  #### **2. Paniers (```/baskets```)**
-   ##### **GET /baskets**
+   ##### ```GET /baskets```
    Récupére la liste de tous les paniers de chaque utilisateur.
    
    *   **Réponse:**
@@ -229,7 +229,7 @@ Ce projet propose une API sécurisée permettant de gérer des utilisateurs et d
    ```
 
  #### **2. Articles (```/items```)**
-   #####**GET /items**
+   ##### ```GET /items```
    Récupére la liste de tous les articles disponibles.
    
    *   **Réponse:**
