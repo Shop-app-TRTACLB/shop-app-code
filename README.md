@@ -94,13 +94,13 @@ Ce projet propose une API sécurisée permettant de gérer des utilisateurs et d
 }
 
    ```
-   **Réponse (succès) :**
+   *   **Réponse (succès) :**
    ```json
 {
   "message": "User registered successfully"
 }
    ```
-   **Réponse (échec) :**
+   *   **Réponse (échec) :**
    ```json
 {
   "error": "Email already registered"
@@ -110,21 +110,21 @@ Ce projet propose une API sécurisée permettant de gérer des utilisateurs et d
    ##### **POST /users/login**
    Authentification de l'utilisateur.
 
-   **Body (JSON) :**
+   *   **Body (JSON) :**
    ```json
 {
   "email": "john@example.com",
   "password": "securepassword"
 }
    ```
-   **Réponse (succès) :**
+   *   **Réponse (succès) :**
    ```json
 {
   "access_token": "JWT_TOKEN",
   "token_type": "bearer"
 }
    ```
-   **Réponse (échec) :**
+   *   **Réponse (échec) :**
    ```json
 {
   "error": "Invalid email or password"
@@ -134,10 +134,10 @@ Ce projet propose une API sécurisée permettant de gérer des utilisateurs et d
    ##### **GET /users/basket**
    Récupère le panier de l'utilisateur authentifié.
 
-   **Headers :**
+   *   **Headers :**
    Authorization: ```Bearer JWT_TOKEN```
    
-   **Réponse (succès) :**
+   *   **Réponse (succès) :**
    ```json
 {
   "basket": [
@@ -149,7 +149,7 @@ Ce projet propose une API sécurisée permettant de gérer des utilisateurs et d
   ]
 }
    ```
-   **Réponse (échec) :**
+   *   **Réponse (échec) :**
    ```json
 {
   "error": "Token expired"
@@ -158,23 +158,23 @@ Ce projet propose une API sécurisée permettant de gérer des utilisateurs et d
    ##### **POST /users/basket/add**
    Ajoute un article au panier de l'utilisateur authentifié.
 
-   **Headers :**
+   *   **Headers :**
    Authorization: ```Bearer JWT_TOKEN```
    
-   **Body (JSON) :**
+   *   **Body (JSON) :**
    ```json
 {
   "item_id": 1,
   "quantity": 1
 }
 ```
-   **Réponse (succès) :**
+   *   **Réponse (succès) :**
    ```json
 {
   "message": "Item added to basket"
 }
    ```
-   **Réponse (échec) :**
+   *   **Réponse (échec) :**
    ```json
 {
   "error": "Item not found"
@@ -184,22 +184,22 @@ Ce projet propose une API sécurisée permettant de gérer des utilisateurs et d
    ##### **POST /users/basket/remove**
    Supprime un article du panier de l'utilisateur authentifié.
 
-   **Headers :**
+   *   **Headers :**
    Authorization: ```Bearer JWT_TOKEN```
    
-   **Body (JSON) :**
+   *   **Body (JSON) :**
    ```json
 {
   "item_id": 1,
 }
 ```
-   **Réponse (succès) :**
+   *   **Réponse (succès) :**
    ```json
 {
   "message": "Item removed from basket"
 }
    ```
-   **Réponse (échec) :**
+   *   **Réponse (échec) :**
    ```json
 {
   "error": "Item not in basket"
@@ -211,7 +211,7 @@ Ce projet propose une API sécurisée permettant de gérer des utilisateurs et d
    ##### **GET /baskets**
    Récupére la liste de tous les paniers de chaque utilisateur.
    
-   **Réponse:**
+   *   **Réponse:**
    ```json
 [
   {
@@ -232,7 +232,7 @@ Ce projet propose une API sécurisée permettant de gérer des utilisateurs et d
    #####**GET /items**
    Récupére la liste de tous les articles disponibles.
    
-   **Réponse:**
+   *   **Réponse:**
    ```json
 [
   {
