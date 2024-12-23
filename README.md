@@ -85,7 +85,7 @@ Ce projet propose une API sécurisée permettant de gérer des utilisateurs et d
    ##### **POST /users/signup**
    Inscription d'un nouvel utilisateur.
 
-   **Body (JSON) :**
+   *   **Body (JSON) :**
    ```json
 {
   "username": "JohnDoe",
